@@ -7,7 +7,7 @@ import UserProfile from './components/UserProfile';
 
 function App() {
   const [messages, setMessages] = useState([]);
-  const [userId, setUserId] = useState(null);  // Manage logged-in user's ID
+  const [userId, setUserId] = useState(null); // Manage logged-in user's ID
 
   useEffect(() => {
     socket.on('newMessage', (data) => {
@@ -25,14 +25,18 @@ function App() {
   }, []);
 
   const sendMessage = (message) => {
-    socket.emit('sendMessage', message, userId);
+    if (message.trim()) {
+      socket.emit('sendMessage', message, userId);
+    }
   };
 
   return (
-    <div className="App">
-      <UserProfile userId={userId} setUserId={setUserId} />
-      <Chat messages={messages} sendMessage={sendMessage} />
-      <FileUpload />
+    <div className="app-container">
+      <div className="content-wrapper">
+        <UserProfile userId={userId} setUserId={setUserId} />
+        <Chat messages={messages} sendMessage={sendMessage} />
+        <FileUpload />
+      </div>
     </div>
   );
 }
