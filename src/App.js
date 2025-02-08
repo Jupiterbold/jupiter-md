@@ -1,23 +1,38 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
+import socket from './utils/socket';
+import Chat from './components/Chat';
+import FileUpload from './components/FileUpload';
+import UserProfile from './components/UserProfile';
 
 function App() {
+  const [messages, setMessages] = useState([]);
+  const [userId, setUserId] = useState(null);  // Manage logged-in user's ID
+
+  useEffect(() => {
+    socket.on('newMessage', (data) => {
+      setMessages((prevMessages) => [...prevMessages, data]);
+    });
+
+    socket.on('newFile', (fileUrl) => {
+      setMessages((prevMessages) => [...prevMessages, { content: fileUrl, type: 'file' }]);
+    });
+
+    return () => {
+      socket.off('newMessage');
+      socket.off('newFile');
+    };
+  }, []);
+
+  const sendMessage = (message) => {
+    socket.emit('sendMessage', message, userId);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <UserProfile userId={userId} setUserId={setUserId} />
+      <Chat messages={messages} sendMessage={sendMessage} />
+      <FileUpload />
     </div>
   );
 }
